@@ -3,32 +3,29 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import jenkins.model.Jenkins
 
-List<String> artifacts = new ArrayList<String>()
+List<String> listofTags4Img = new ArrayList<String>()
 
 try {
-
     def jsonSlurper = new JsonSlurper()
-    def n = 101
-    def artifactsUrl = "https://repository.docker.image/v2/"+app+"/tags/list?n="+n.toString()
-    def isAll="no"
+    def n = 101 
+    def dockerRepositoryUrl = "https://repository.docker.image/v2/"+nameofImage+"/tags/list?n="+n.toString()
+    def isAll="no"      //not exist do while in groovy
     while(isAll!=""){  
-        def artifactsUrltmp = "https://repository.docker.image/v2/"+app+"/tags/list?n="+n.toString()
-        isAll= ["curl -X GET -I ${artifactsUrltmp} | grep next"].execute().text;
+        def dockerRepositoryUrltmp = "https://repository.docker.image/v2/"+nameofImage+"/tags/list?n="+n.toString() 
+        isAll= ["curl -X GET -I ${dockerRepositoryUrltmp} | grep next"].execute().text;
         if(isAll != "")
-            n=n*2
+            n=n+1
     } 
-    artifactsUrl = "https://repository.docker.image/v2/"+app+"/tags/list?n="+n.toString()
-    def artifactsObjectRaw = [" curl -X GET -H ${artifactsUrl}"].execute().text;
-    def artifactsJsonObject = jsonSlurper.parseText(artifactsObjectRaw)
-    def dataArray = artifactsJsonObject.tags
-    for(item in dataArray){
-        if (!item.endsWith('-SNAPSHOT')){
-            artifacts.add(item)
-        }
+    dockerRepositoryUrl = "https://repository.docker.image/v2/"+nameofImage+"/tags/list?n="+n.toString()
+    def listofTags4ImgObjectRaw = [" curl -X GET -H ${dockerRepositoryUrl}"].execute().text;
+    def listofTags4ImgJsonObject = jsonSlurper.parseText(listofTags4ImgObjectRaw)
+    def dataArray = listofTags4ImgJsonObject.tags
+    for(item in dataArray){        
+        listofTags4Img.add(item)
     }
-    artifacts=artifacts.reverse()
+    listofTags4Img=listofTags4Img.reverse()
 }
 catch (Exception e) {
-    artifacts.add(e)
+    listofTags4Img.add(e)
 }
-return artifacts
+return listofTags4Img
